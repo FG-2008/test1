@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Capture Photo</title>
+</head>
+<body>
+    <h1>Capture Photo</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="snap">Capture Photo</button>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <script>
+        // Access the user's webcam
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const snap = document.getElementById('snap');
+
+        // Request access to the user's camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error accessing the camera: " + err);
+            });
+
+        // Capture a photo when the button is clicked
+        snap.addEventListener('click', () => {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Save the captured image
+            const dataUrl = canvas.toDataURL('image/png');
+            console.log(dataUrl);
+            // You can send this dataUrl to your server using an AJAX request
+        });
+    </script>
+</body>
+</html>snap.addEventListener('click', () => {
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/png');
+
+    // إرسال الصورة إلى الخادم
+    fetch('/upload', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: dataUrl }),
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+});
